@@ -242,6 +242,12 @@ type NetworkConfig struct {
 	// the headless service, defaults to shared
 	// +kubebuilder:validation:Enum={Shared,UniquePerReplica}
 	SubdomainPolicy *SubdomainPolicy `json:"subdomainPolicy"`
+
+	// EndpointPolicy determines the policy that will be used when creating
+	// the headless service and its endpoints, defaults to LeaderOnly
+	// +kubebuilder:validation:Enum={All,LeaderOnly}
+	// +optional
+	EndpointPolicy *EndpointPolicy `json:"endpointPolicy"`
 }
 
 type SubdomainPolicy string
@@ -257,6 +263,15 @@ const (
 	// Replica 0: my-lws-0.my-lws-0,my-lws-0-1.my-lws-0, my-lws-0-2.my-lws-0
 	// Replica 1: my-lws-1.my-lws-1,my-lws-1-1.my-lws-1, my-lws-1-2.my-lws-1
 	SubdomainUniquePerReplica SubdomainPolicy = "UniquePerReplica"
+)
+
+type EndpointPolicy string
+
+const (
+	// EndpointAll will include all replicas in the headless service endpoints.
+	EndpointAll EndpointPolicy = "All"
+	// EndpointLeaderOnly will include only the leader replica in the headless service endpoints.
+	EndpointLeaderOnly EndpointPolicy = "LeaderOnly"
 )
 
 // RollingUpdateConfiguration defines the parameters to be used for RollingUpdateStrategyType.

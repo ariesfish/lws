@@ -75,14 +75,29 @@ func ExpectValidServices(ctx context.Context, k8sClient client.Client, leaderWor
 			if err := k8sClient.Get(ctx, types.NamespacedName{Name: lws.Name, Namespace: lws.Namespace}, &headlessService); err != nil {
 				return false, err
 			}
-			return validateService(headlessService, lws.Name, map[string]string{leaderworkerset.SetNameLabelKey: lws.Name})
+
+			selector := map[string]string{
+				leaderworkerset.SetNameLabelKey: lws.Name,
+			}
+			if *lws.Spec.NetworkConfig.EndpointPolicy == leaderworkerset.EndpointLeaderOnly {
+				selector[leaderworkerset.WorkerIndexLabelKey] = "0"
+			}
+			return validateService(headlessService, lws.Name, selector)
 		}
 
 		for i := 0; i < int(*lws.Spec.Replicas); i++ {
 			if err := k8sClient.Get(ctx, types.NamespacedName{Name: fmt.Sprintf("%s-%s", lws.Name, strconv.Itoa(i)), Namespace: lws.Namespace}, &headlessService); err != nil {
 				return false, err
 			}
-			if _, err := validateService(headlessService, fmt.Sprintf("%s-%s", lws.Name, strconv.Itoa(i)), map[string]string{leaderworkerset.SetNameLabelKey: lws.Name, leaderworkerset.GroupIndexLabelKey: strconv.Itoa(i)}); err != nil {
+
+			selector := map[string]string{
+				leaderworkerset.SetNameLabelKey:    lws.Name,
+				leaderworkerset.GroupIndexLabelKey: strconv.Itoa(i),
+			}
+			if *lws.Spec.NetworkConfig.EndpointPolicy == leaderworkerset.EndpointLeaderOnly {
+				selector[leaderworkerset.WorkerIndexLabelKey] = "0"
+			}
+			if _, err := validateService(headlessService, fmt.Sprintf("%s-%s", lws.Name, strconv.Itoa(i)), selector); err != nil {
 				return false, err
 			}
 		}

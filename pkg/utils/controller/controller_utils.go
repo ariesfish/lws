@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"slices"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,6 +30,19 @@ import (
 
 	leaderworkerset "sigs.k8s.io/lws/api/leaderworkerset/v1"
 )
+
+func addHeadlessServicePorts(service *corev1.Service, ports []corev1.ContainerPort) {
+	for _, p1 := range ports {
+		if slices.ContainsFunc(service.Spec.Ports, func(p2 corev1.ServicePort) bool { return p2.Protocol == p1.Protocol && p2.Port == p1.ContainerPort }) {
+			continue
+		}
+		service.Spec.Ports = append(service.Spec.Ports, corev1.ServicePort{
+			Name:     p1.Name,
+			Protocol: p1.Protocol,
+			Port:     p1.ContainerPort,
+		})
+	}
+}
 
 func CreateHeadlessServiceIfNotExists(ctx context.Context, k8sClient client.Client, Scheme *runtime.Scheme, lws *leaderworkerset.LeaderWorkerSet, serviceName string, serviceSelector map[string]string, owner metav1.Object) error {
 	log := ctrl.LoggerFrom(ctx)
@@ -49,6 +63,19 @@ func CreateHeadlessServiceIfNotExists(ctx context.Context, k8sClient client.Clie
 				Selector:                 serviceSelector,
 				PublishNotReadyAddresses: true,
 			},
+		}
+
+		if *lws.Spec.NetworkConfig.EndpointPolicy == leaderworkerset.EndpointLeaderOnly {
+			if lws.Spec.LeaderWorkerTemplate.LeaderTemplate != nil {
+				addHeadlessServicePorts(&headlessService, lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers[0].Ports)
+			} else {
+				addHeadlessServicePorts(&headlessService, lws.Spec.LeaderWorkerTemplate.WorkerTemplate.Spec.Containers[0].Ports)
+			}
+		} else {
+			if lws.Spec.LeaderWorkerTemplate.LeaderTemplate != nil {
+				addHeadlessServicePorts(&headlessService, lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers[0].Ports)
+			}
+			addHeadlessServicePorts(&headlessService, lws.Spec.LeaderWorkerTemplate.WorkerTemplate.Spec.Containers[0].Ports)
 		}
 
 		// Set the controller owner reference for garbage collection and reconciliation.

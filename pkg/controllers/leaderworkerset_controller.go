@@ -186,7 +186,13 @@ func (r *LeaderWorkerSetReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 func (r *LeaderWorkerSetReconciler) reconcileHeadlessServices(ctx context.Context, lws *leaderworkerset.LeaderWorkerSet) error {
 	if lws.Spec.NetworkConfig == nil || *lws.Spec.NetworkConfig.SubdomainPolicy == leaderworkerset.SubdomainShared {
-		if err := controllerutils.CreateHeadlessServiceIfNotExists(ctx, r.Client, r.Scheme, lws, lws.Name, map[string]string{leaderworkerset.SetNameLabelKey: lws.Name}, lws); err != nil {
+		selector := map[string]string{
+			leaderworkerset.SetNameLabelKey: lws.Name,
+		}
+		if *lws.Spec.NetworkConfig.EndpointPolicy == leaderworkerset.EndpointLeaderOnly {
+			selector[leaderworkerset.WorkerIndexLabelKey] = "0"
+		}
+		if err := controllerutils.CreateHeadlessServiceIfNotExists(ctx, r.Client, r.Scheme, lws, lws.Name, selector, lws); err != nil {
 			return err
 		}
 		return nil

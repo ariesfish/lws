@@ -77,12 +77,21 @@ func (r *LeaderWorkerSetWebhook) Default(ctx context.Context, obj runtime.Object
 	if lws.Spec.NetworkConfig == nil {
 		lws.Spec.NetworkConfig = &v1.NetworkConfig{}
 		subdomainPolicy := v1.SubdomainShared
+		endpointPolicy := v1.EndpointLeaderOnly
 		lws.Spec.NetworkConfig = &v1.NetworkConfig{
 			SubdomainPolicy: &subdomainPolicy,
+			EndpointPolicy:  &endpointPolicy,
 		}
-	} else if lws.Spec.NetworkConfig.SubdomainPolicy == nil {
+	}
+	
+	if lws.Spec.NetworkConfig.SubdomainPolicy == nil {
 		subdomainPolicy := v1.SubdomainShared
 		lws.Spec.NetworkConfig.SubdomainPolicy = &subdomainPolicy
+	}
+
+	if lws.Spec.NetworkConfig.EndpointPolicy == nil {
+		endpointPolicy := v1.EndpointLeaderOnly
+		lws.Spec.NetworkConfig.EndpointPolicy = &endpointPolicy
 	}
 
 	return nil
@@ -116,6 +125,9 @@ func (r *LeaderWorkerSetWebhook) ValidateUpdate(ctx context.Context, oldObj, new
 	}
 	if newLws.Spec.NetworkConfig != nil && newLws.Spec.NetworkConfig.SubdomainPolicy == nil {
 		allErrs = append(allErrs, field.Invalid(specPath.Child("networkConfig", "subdomainPolicy"), oldLws.Spec.NetworkConfig.SubdomainPolicy, "cannot set subdomainPolicy as null"))
+	}
+	if newLws.Spec.NetworkConfig != nil && newLws.Spec.NetworkConfig.EndpointPolicy == nil {
+		allErrs = append(allErrs, field.Invalid(specPath.Child("networkConfig", "endpointPolicy"), oldLws.Spec.NetworkConfig.EndpointPolicy, "cannot set endpointPolicy as null"))
 	}
 
 	return nil, allErrs.ToAggregate()

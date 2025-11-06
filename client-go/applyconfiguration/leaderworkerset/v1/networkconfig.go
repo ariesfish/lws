@@ -25,6 +25,7 @@ import (
 // with apply.
 type NetworkConfigApplyConfiguration struct {
 	SubdomainPolicy *leaderworkersetv1.SubdomainPolicy `json:"subdomainPolicy,omitempty"`
+	EndpointPolicy  *leaderworkersetv1.EndpointPolicy  `json:"endpointPolicy,omitempty"`
 }
 
 // NetworkConfigApplyConfiguration constructs a declarative configuration of the NetworkConfig type for use with
@@ -38,5 +39,13 @@ func NetworkConfig() *NetworkConfigApplyConfiguration {
 // If called multiple times, the SubdomainPolicy field is set to the value of the last call.
 func (b *NetworkConfigApplyConfiguration) WithSubdomainPolicy(value leaderworkersetv1.SubdomainPolicy) *NetworkConfigApplyConfiguration {
 	b.SubdomainPolicy = &value
+	return b
+}
+
+// WithEndpointPolicy sets the EndpointPolicy field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the EndpointPolicy field is set to the value of the last call.
+func (b *NetworkConfigApplyConfiguration) WithEndpointPolicy(value leaderworkersetv1.EndpointPolicy) *NetworkConfigApplyConfiguration {
+	b.EndpointPolicy = &value
 	return b
 }

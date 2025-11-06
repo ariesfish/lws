@@ -227,8 +227,10 @@ func getPatch(lws *leaderworkerset.LeaderWorkerSet) ([]byte, error) {
 	if clone.Spec.NetworkConfig == nil {
 		clone.Spec.NetworkConfig = &leaderworkerset.NetworkConfig{}
 		subdomainPolicy := leaderworkerset.SubdomainShared
+		endpointPolicy := leaderworkerset.EndpointLeaderOnly
 		clone.Spec.NetworkConfig = &leaderworkerset.NetworkConfig{
 			SubdomainPolicy: &subdomainPolicy,
+			EndpointPolicy:  &endpointPolicy,
 		}
 	}
 

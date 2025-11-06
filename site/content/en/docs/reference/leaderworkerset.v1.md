@@ -46,6 +46,18 @@ description: Generated API reference documentation for leaderworkerset.x-k8s.io/
 </tbody>
 </table>
 
+## `EndpointPolicy`     {#leaderworkerset-x-k8s-io-v1-EndpointPolicy}
+    
+(Alias of `string`)
+
+**Appears in:**
+
+- [NetworkConfig](#leaderworkerset-x-k8s-io-v1-NetworkConfig)
+
+
+
+
+
 ## `LeaderWorkerSetSpec`     {#leaderworkerset-x-k8s-io-v1-LeaderWorkerSetSpec}
     
 
@@ -273,6 +285,14 @@ the VolumeClaimTemplates.</p>
 <td>
    <p>SubdomainPolicy determines the policy that will be used when creating
 the headless service, defaults to shared</p>
+</td>
+</tr>
+<tr><td><code>endpointPolicy</code><br/>
+<a href="#leaderworkerset-x-k8s-io-v1-EndpointPolicy"><code>EndpointPolicy</code></a>
+</td>
+<td>
+   <p>EndpointPolicy determines the policy that will be used when creating
+the headless service and its endpoints, defaults to LeaderOnly</p>
 </td>
 </tr>
 </tbody>

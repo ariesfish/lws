@@ -17601,6 +17601,14 @@ spec:
                 description: NetworkConfig defines the network configuration of the
                   group
                 properties:
+                  endpointPolicy:
+                    description: |-
+                      EndpointPolicy determines the policy that will be used when creating
+                      the headless service and its endpoints, defaults to LeaderOnly
+                    enum:
+                    - All
+                    - LeaderOnly
+                    type: string
                   subdomainPolicy:
                     description: |-
                       SubdomainPolicy determines the policy that will be used when creating
